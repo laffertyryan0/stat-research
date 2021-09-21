@@ -3,6 +3,7 @@ import numpy as np
 import os
 import shutil
 import pandas as pd
+import json
 
 #I_j is integral from -inf to t of x^j e^(-1/2 x^2)
 def gen_I(t,max_j = 10):
@@ -24,9 +25,6 @@ def gen_I(t,max_j = 10):
 
 
 #need to integrate from 0 to t of (x+a)^k e^(-x^2/2) where k is even
-#its a binomial expansion
-#sum_{i=1}^k (k choose i)  a^(k-i) integral 0 to t of x^i e^(-x^2/2) dx
-#sum_{i=1}^k (k choose i) a^(k-i) IncompleteGamma(i+1,t)
 
 def F(a,k):
     norm = sum(special.binom(k,j)*a**(k-j)*I_j
@@ -43,6 +41,9 @@ def tabulateF(kMax = 20,
               xMin = -5,
               xMax = 5,
               xStep = .01):
+    args = locals()
+    with open("./json/configTable.json",mode = "w") as file:
+        file.write(str(args).replace("'","\""))
     dirname = "table"
     shutil.rmtree("table") if os.path.isdir(dirname) else 0
     os.mkdir(dirname)

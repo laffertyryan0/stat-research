@@ -1,5 +1,6 @@
 library(arrangements)
 library(invgamma)
+library(rjson)
 C = function(j, r, h, Upaj,Upajj){
   s = 2*rep(h[j],length(Upajj))
   Upajm1 = solve(Upaj)
@@ -43,12 +44,13 @@ sampDmarginal = function(j,Ujj,Upaj,Upajj,h,alpha){
 }
 
 #sample from f(x) = (x+a)^k * standardnormalpdf(x)
-aMin = -10
-aMax = 10
-aStep = .1
-xMin = -5
-xMax = 5
-xStep = .1
+args <- fromJSON(file = ".json/configTable.json")
+aMin = args$aMin
+aMax = args$aMax
+aStep = args$aStep
+xMin = args$xMin
+xMax = args$xMax
+xStep = args$xStep
 sampF = function(k,a){
   u = runif(1,0,1)
   path = paste("./table/tablekequals",k,".csv",sep="")
@@ -58,7 +60,6 @@ sampF = function(k,a){
                   check.names = FALSE,
                   row.names = 1,
                   skip = as.integer((a-aMin)/aStep))
-  u = .542
   leftendpoint = findInterval(u,line)
   rightendpoint = leftendpoint + 1
   left_xval = xMin + xStep*(leftendpoint - 1)
@@ -67,11 +68,10 @@ sampF = function(k,a){
   right_Fval = if(rightendpoint != (length(line)+1)) line[[rightendpoint]] else 1
   slope = (right_Fval-left_Fval)/(right_xval-left_xval)
   approx_inv = if(slope!=0) left_xval + (u - left_Fval)/slope else left_xval
-  return approx_inv
+  return(approx_inv)
 }
-
-pp = sampF(4,.3)
-
+pp = c();
+system.time(for(i in 1:1000){pp = append(pp,sampF(4,.3))})
 
 Upajj = c(0, 1)
 Upaj = matrix(c(2,0,0,2),nrow = 2)
